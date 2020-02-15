@@ -1,0 +1,146 @@
+# -*- coding: utf-8 -*-
+
+
+'''
+0. Dada una codificación R, construir un diccionario para codificar m2c y 
+otro para decodificar c2m
+'''
+R = [('a','0'), ('b','11'), ('c','100'), ('d','1010'), ('e','1011')]
+
+# encoding dictionary
+m2c = dict(R)
+
+# decoding dictionary
+c2m = dict([(c,m) for m, c in R])
+
+
+'''
+1. Definir una función Encode(M, m2c) que, dado un mensaje M y un diccionario 
+de codificación m2c, devuelva el mensaje codificado C.
+'''
+
+def Encode(M, m2c):
+    i = 0
+    C = ''
+    while i < len(M):
+        C = C + m2c[M[i]]
+        i = i + 1
+    return C
+    
+
+''' 
+2. Definir una función Decode(C, c2m) que, dado un mensaje codificado C y un diccionario 
+de decodificación c2m, devuelva el mensaje original M.
+'''
+def Decode(C,c2m):
+    i = 0
+    M = ''
+    while i < len(C):
+        j = 1
+        while j < len(C):
+            if (C[i:(i+j)] in c2m):
+                M = M + c2m[C[i:(i+j)]]
+                i = i+j
+                break
+            else:
+                j = j + 1
+    return M
+  
+
+#------------------------------------------------------------------------
+# Ejemplo 1
+#------------------------------------------------------------------------
+
+R = [('a','0'), ('b','11'), ('c','100'), ('d','1010'), ('e','1011')]
+
+# encoding dictionary
+m2c = dict(R)
+
+# decoding dictionary
+c2m = dict([(c,m) for m, c in R])
+M='aabacddeae'
+C=Encode(M,m2c)
+print(C=='0011010010101010101101011')
+print(M==Decode(C,c2m))
+
+
+
+#------------------------------------------------------------------------
+# Ejemplo 2
+#------------------------------------------------------------------------
+R = [('a','0'), ('b','10'), ('c','110'), ('d','1110'), ('e','1111')]
+
+# encoding dictionary
+m2c = dict(R)
+
+# decoding dictionary
+c2m = dict([(c,m) for m, c in R])
+M='aabacddeaeabc'
+C=Encode(M,m2c)
+print(C=='0010011011101110111101111010110')
+print(M==Decode(C,c2m))
+
+
+
+
+#------------------------------------------------------------------------
+# Ejemplo 3
+#------------------------------------------------------------------------
+R = [('ab','0'), ('cb','11'), ('cc','100'), ('da','1010'), ('ae','1011')]
+
+# encoding dictionary
+m2c = dict(R)
+
+# decoding dictionary
+c2m = dict([(c,m) for m, c in m2c.items()])
+
+M='ababcbccdaae'
+C=Encode(M,m2c)
+print(C=='001110010101011')
+
+print(M==Decode(C,c2m))
+
+
+''' 
+3.
+Codificar y decodificar 20 mensajes aleatorios de longitudes también aleatorias.  
+Comprobar si los mensajes decodificados coinciden con los originales.
+'''
+
+
+
+
+#------------------------------------------------------------------------
+# Ejemplo 4
+#------------------------------------------------------------------------
+R = [('a','0'), ('b','01'), ('c','011'), ('d','0111'), ('e','1111')]
+
+# encoding dictionary
+m2c = dict(R)
+
+# decoding dictionary
+c2m = dict([(c,m) for m, c in R])
+
+
+
+''' 
+4. Codificar y decodificar los mensajes  'ae' y 'be'. 
+Comprobar si los mensajes decodificados coinciden con los originales.
+'''
+
+
+
+
+'''
+¿Por qué da error?
+
+(No es necesario volver a implementar Decode(C, m2c) para que no dé error)
+'''
+
+
+
+  
+
+
+
+
