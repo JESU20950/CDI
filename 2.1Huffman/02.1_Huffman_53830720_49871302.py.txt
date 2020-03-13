@@ -13,7 +13,7 @@ import time
 Dada una distribucion de probabilidad, hallar un código canónico de Huffman asociado
 '''
 
-
+#Descomentar en caso de que de error de pila (recursividad)
 #resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
 #sys.setrecursionlimit(10**9)
 
