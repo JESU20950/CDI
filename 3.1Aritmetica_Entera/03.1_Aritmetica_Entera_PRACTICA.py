@@ -38,8 +38,26 @@ IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos)=
 
 """
 
-
+        
+def calculate_bound(mensaje,alfabeto, F, numero_de_simbolos):
+    mk = 0
+    Mk = 1
+    for i in range(0,len(mensaje),numero_de_simbolos):
+        i = alfabeto.index(mensaje[i:i+numero_de_simbolos])+1
+        mk = mk+F(i-1)*(Mk-mk)
+        Mk = mk+F(i)*(Mk-mk)
+    return mk,Mk
+    
 def IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos=1):
+    alfabeto_frecuencias = dict(zip(alfabeto,frecuencias))
+    #Funcion de distribucion (probabilidad acumulada)
+    F = dict([(0,0)])
+    suma_frecuencias = 0
+    for i in range(0,len(frecuencias)):
+        suma_frecuencias = suma_frecuencias+frecuencias[i]
+        F[i+1] = suma_frecuencias
+        
+    mk, Mk = calculate_bounds(mensaje, alfabeto, F, numero_de_simbolos) 
     
     
 #%%
