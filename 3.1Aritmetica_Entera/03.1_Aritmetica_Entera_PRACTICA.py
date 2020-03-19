@@ -39,25 +39,71 @@ IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos)=
 """
 
         
-def calculate_bound(mensaje,alfabeto, F, numero_de_simbolos):
-    mk = 0
-    Mk = 1
-    for i in range(0,len(mensaje),numero_de_simbolos):
-        i = alfabeto.index(mensaje[i:i+numero_de_simbolos])+1
-        mk = mk+F(i-1)*(Mk-mk)
-        Mk = mk+F(i)*(Mk-mk)
-    return mk,Mk
+def binari(number, digits):
+    binari_number = "{0:b}".format(number)
+    rest = digits-len(binari_number)
+    for i in range(0, rest):
+        binari_number = '0'+binari_number
+    
+    return binari_number
+    
     
 def IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos=1):
     alfabeto_frecuencias = dict(zip(alfabeto,frecuencias))
     #Funcion de distribucion (probabilidad acumulada)
-    F = dict([(0,0)])
-    suma_frecuencias = 0
+    Cum_Count = dict([(0,0)])
+    Total_Count = 0
     for i in range(0,len(frecuencias)):
-        suma_frecuencias = suma_frecuencias+frecuencias[i]
-        F[i+1] = suma_frecuencias
+        Total_Count = Total_Count+frecuencias[i]
+        Cum_Count[i+1] = Total_Count    
         
-    mk, Mk = calculate_bounds(mensaje, alfabeto, F, numero_de_simbolos) 
+    Total_Count = Cum_Count[len(alfabeto)+1]
+    mk = 0
+    Mk = Total_Count*(mensaje/numero_de_simbolos)
+    code = ""
+    nbits = int(logmath.log(Mk,2))+1
+    
+    
+    scale = 0
+    for i in range(0,len(mensaje),numero_de_simbolos):
+        i = alfabeto.index(mensaje[i:i+numero_de_simbolos])+1
+        mk = mk+int((Mk-mk+1)*(Cum_Count[i-1]/Total_Count))
+        #Le resta uno porque int(((Mk-mk+1)*Cum_Count[i])/Total_Count) pertenece al siguiente intervalo.
+        Mk = mk+int((Mk-mk+1)*(Cum_Count[i]/Total_Count))-1
+        
+        mk_binari = binari(mk,nbits)
+        Mk_binari = binari(Mk,nbits)
+        while (mk_binari[0] == Mk_binari[0] )
+            #E1
+            if (mk_binari[0] == Mk_binari[0] == '0'):
+                new = new + '0'
+                
+                #Multiplica por 2
+                mk_binari = mk_binari(1:)+'0'
+                Mk_binari = Mk_binari(1:)+'0'
+            #E2
+            else if (mk_binari[0] == Mk_binari[0] == '1'):
+                new = new + '1'
+                
+                #Multiplica por 2
+                mk_binari = mk_binari(1:)+'0'
+                Mk_binari = Mk_binari(1:)+'0'
+                #Le resta -2^nbits pero como el numero se representa con 2^nbit pues no se hace nada
+                
+            #E3
+            else if (mk_binari[1] == '1' && Mk_binari[1] == '1'):
+                #Multiplica por 2
+                mk_binari = mk_binari(1:)+'0'
+                Mk_binari = Mk_binari(1:)+'0'
+                
+                
+                
+            
+            
+            
+            
+        
+    
     
     
 #%%
