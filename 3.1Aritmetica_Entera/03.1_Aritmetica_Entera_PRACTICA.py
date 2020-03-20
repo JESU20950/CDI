@@ -57,63 +57,80 @@ def IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos=1):
         Total_Count = Total_Count+frecuencias[i]
         Cum_Count[i+1] = Total_Count    
         
-    Total_Count = Cum_Count[len(alfabeto)+1]
-    mk = 0
-    Mk = Total_Count*(mensaje/numero_de_simbolos)
+        
+    Mk = Total_Count*4
     code = ""
-    nbits = int(logmath.log(Mk,2))+1
+    nbits = int(math.log(Mk,2))+1
     
+    mk = 0
+    Mk = (2**nbits)-1
     
     scale = 0
     for i in range(0,len(mensaje),numero_de_simbolos):
         i = alfabeto.index(mensaje[i:i+numero_de_simbolos])+1
-        mk = mk+int((Mk-mk+1)*(Cum_Count[i-1]/Total_Count))
+        
+        mk_aux = mk+int((Mk-mk+1)*(Cum_Count[i-1]/Total_Count))
         #Le resta uno porque int(((Mk-mk+1)*Cum_Count[i])/Total_Count) pertenece al siguiente intervalo.
-        Mk = mk+int((Mk-mk+1)*(Cum_Count[i]/Total_Count))-1
+        Mk_aux = mk+int((Mk-mk+1)*(Cum_Count[i]/Total_Count))-1
+        mk = mk_aux
+        Mk = Mk_aux
         
         mk_binari = binari(mk,nbits)
         Mk_binari = binari(Mk,nbits)
-        while (mk_binari[0] == Mk_binari[0] )
+        
+        
+        while (mk_binari[0] == Mk_binari[0] or (mk_binari[1] == '1' and Mk_binari[1] == '0')):
             #E1
             if (mk_binari[0] == Mk_binari[0] == '0'):
-                new = new + '0'
-                
-                #Multiplica por 2
-                mk_binari = mk_binari(1:)+'0'
-                Mk_binari = Mk_binari(1:)+'0'
+                code = code + '0'
+                mk_binari = mk_binari[1:]+'0'
+                Mk_binari = Mk_binari[1:]+'1'
+                while(scale > 0):
+                    code = code + '1'
+                    scale = scale -1
             #E2
-            else if (mk_binari[0] == Mk_binari[0] == '1'):
-                new = new + '1'
-                
-                #Multiplica por 2
-                mk_binari = mk_binari(1:)+'0'
-                Mk_binari = Mk_binari(1:)+'0'
-                #Le resta -2^nbits pero como el numero se representa con 2^nbit pues no se hace nada
-                
+            elif (mk_binari[0] == Mk_binari[0] == '1'):
+                code = code + '1'
+                mk_binari = mk_binari[1:]+'0'
+                Mk_binari = Mk_binari[1:]+'1'
+                while(scale > 0):
+                    code = code + '0'
+                    scale = scale -1
             #E3
-            else if (mk_binari[1] == '1' && Mk_binari[1] == '1'):
-                #Multiplica por 2
-                mk_binari = mk_binari(1:)+'0'
-                Mk_binari = Mk_binari(1:)+'0'
-                
-                
-                
-            
-            
-            
-            
-        
+            elif (mk_binari[1] == '1' and Mk_binari[1] == '0'):
+                mk_binari = mk_binari[1:]+'0'
+                Mk_binari = Mk_binari[1:]+'1'
+                mk_binari = '0' + mk_binari[1:]
+                Mk_binari = '1' + Mk_binari[1:]
+                scale = scale + 1
+        mk = int(mk_binari,2)
+        Mk = int(Mk_binari,2)
     
     
-    
+    #envio del limite inferior del intervalo una vez finalizada la codificacion
+    if (mk_binari[0] == '0'):
+        code = code + '0'
+        while(scale > 0):
+            code = code + '1'
+            scale = scale -1
+        code = code + mk_binari[1:]
+    elif (mk_binari[0] == '1'):
+        code = code + '1'
+        while(scale > 0):
+            code = code + '0'
+            scale = scale -1
+        code = code + mk_binari[1:]
+    return code
+                
+
 #%%
-            
+       
             
 """
 Dada la representación binaria del número que representa un mensaje, la
 longitud del mensaje y el alfabeto con sus frecuencias 
 dar el mensaje original
-"""
+
            
 def IntegerArithmeticDecode(codigo,tamanyo_mensaje,alfabeto,frecuencias):
 
@@ -127,7 +144,7 @@ def IntegerArithmeticDecode(codigo,tamanyo_mensaje,alfabeto,frecuencias):
 
 
 
-#%%
+
 '''
 Definir una función que codifique un mensaje utilizando codificación aritmética con precisión infinita
 obtenido a partir de las frecuencias de los caracteres del mensaje.
@@ -210,4 +227,4 @@ with open ("la_regenta", "r") as myfile:
 Comparad las ratios de compresión con las obtenidas con códigos de Huffman.
 '''
 
-        
+"""      
