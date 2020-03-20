@@ -66,9 +66,12 @@ def IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos=1):
     Mk = (2**nbits)-1
     
     scale = 0
-    for i in range(0,len(mensaje),numero_de_simbolos):
-        i = alfabeto.index(mensaje[i:i+numero_de_simbolos])+1
-        
+    for j in range(0,len(mensaje),numero_de_simbolos):
+        if (j+numero_de_simbolos < len(mensaje)):
+            i = alfabeto.index(mensaje[j:j+numero_de_simbolos])+1
+        else:
+            i = alfabeto.index(mensaje[j:len(mensaje)])+1
+            
         mk_aux = mk+int((Mk-mk+1)*(Cum_Count[i-1]/Total_Count))
         #Le resta uno porque int(((Mk-mk+1)*Cum_Count[i])/Total_Count) pertenece al siguiente intervalo.
         Mk_aux = mk+int((Mk-mk+1)*(Cum_Count[i]/Total_Count))-1
@@ -124,23 +127,118 @@ def IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos=1):
                 
 
 #%%
-       
-            
+
+
 """
 Dada la representación binaria del número que representa un mensaje, la
 longitud del mensaje y el alfabeto con sus frecuencias 
 dar el mensaje original
 
-           
+"""           
+
+
 def IntegerArithmeticDecode(codigo,tamanyo_mensaje,alfabeto,frecuencias):
-
+    alfabeto_frecuencias = dict(zip(alfabeto,frecuencias))
+    #Funcion de distribucion (probabilidad acumulada)
+    Cum_Count = dict([(0,0)])
+    Total_Count = 0
+    for i in range(0,len(frecuencias)):
+        Total_Count = Total_Count+frecuencias[i]
+        Cum_Count[i+1] = Total_Count    
+        
+        
+    Mk = Total_Count*4
+    mensaje = ""
+    nbits = int(math.log(Mk,2))+1
     
+    mk = 0
+    Mk = (2**nbits)-1
+    
+    
+    b = nbits
+    tbinari = codigo[:b]
+    t = int(tbinari,2)
+    w = int(((t-mk+1)*Total_Count-1)/(Mk-mk+1))
+    
+    while(len(mensaje) != tamanyo_mensaje):
+        #Decode symbol
+        for i in range(1,len(Cum_Count)):
+            if (Cum_Count[i-1] <= w <Cum_Count[i]):
+                mensaje = mensaje + alfabeto[i-1]
+                mk_aux = mk+int((Mk-mk+1)*(Cum_Count[i-1]/Total_Count))
+                Mk_aux = mk+int((Mk-mk+1)*(Cum_Count[i]/Total_Count))-1
+                mk = mk_aux
+                Mk = Mk_aux
 
 
-             
-            
-       
+        mk_binari = binari(mk,nbits)
+        Mk_binari = binari(Mk,nbits)
+        while (mk_binari[0] == Mk_binari[0] or (mk_binari[1] == '1' and Mk_binari[1] == '0')):
+            #E1
+            if (mk_binari[0] == Mk_binari[0] == '0'):
+                mk_binari = mk_binari[1:]+'0'
+                Mk_binari = Mk_binari[1:]+'1'
+                tbinari = tbinari[1:] + codigo[b]
+                b = b +1
+            #E2
+            elif (mk_binari[0] == Mk_binari[0] == '1'):
+                mk_binari = mk_binari[1:]+'0'
+                Mk_binari = Mk_binari[1:]+'1'
+                tbinari = tbinari[1:] + codigo[b]
+                b = b +1
+            #E3
+            elif (mk_binari[1] == '1' and Mk_binari[1] == '0'):
+                mk_binari = mk_binari[1:]+'0'
+                Mk_binari = Mk_binari[1:]+'1'
+                mk_binari = '0' + mk_binari[1:]
+                Mk_binari = '1' + Mk_binari[1:]
+                tbinari = tbinari[1:] + codigo[b]
+                b = b +1
+                if (tbinari[0] == '0'):
+                    tbinari = '1' + tbinari[1:]
+                else:
+                    tbinari = '0' + tbinari[1:]
+        mk = int(mk_binari,2)
+        Mk = int(Mk_binari,2)
+        t = int(tbinari,2)
+        w = int(((t-mk+1)*Total_Count-1)/(Mk-mk+1))
+    return mensaje
 
+
+
+
+
+alfabeto=['a','b','c','d']
+frecuencias=[1,10,20,300]
+numero_de_simbolos=1
+mensaje='ddddccaabbccaaccaabbaaddaacc' 
+codigo = IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos)
+decode = IntegerArithmeticDecode(codigo,len(mensaje),alfabeto,frecuencias)
+print(mensaje == decode)
+
+
+alfabeto=['aa','bb','cc','dd']
+frecuencias=[1,10,20,300]
+numero_de_simbolos=2
+mensaje='ddddccaabbccaaccaabbaaddaacc' 
+codigo = IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos)
+decode = IntegerArithmeticDecode(codigo,len(mensaje),alfabeto,frecuencias)
+print(mensaje == decode)
+
+
+def tablaFrecuencias(mensaje,numero_de_simbolos=1):
+    frecuencias = dict([])
+    for i in range(0,len(mensaje),numero_de_simbolos):
+        if (i+numero_de_simbolos-1<len(mensaje)):
+            simbolo = mensaje[i:(i+numero_de_simbolos)] 
+            if simbolo in frecuencias:
+                frecuencias[simbolo] = frecuencias[simbolo] +1
+            else:
+                frecuencias[simbolo] = 1
+        else:
+                frecuencias[mensaje[i:len(mensaje)]] = 1
+    lista = list(map(list, frecuencias.items()))
+    return lista
 
 
 
@@ -155,14 +253,19 @@ anterior.
 
 
 def EncodeArithmetic(mensaje_a_codificar,numero_de_simbolos=1):
-
+    tabla = tablaFrecuencias(mensaje_a_codificar, numero_de_simbolos)
+    alfabeto = [ a for [a,_] in tabla]
+    frecuencias = [ f  for [_,f] in tabla]
+    mensaje_codificado =IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos)
     return mensaje_codificado,alfabeto,frecuencias
     
 def DecodeArithmetic(mensaje_codificado,tamanyo_mensaje,alfabeto,frecuencias):
-
+    mensaje_decodificado = IntegerArithmeticDecode(mensaje_codificado,tamanyo_mensaje,alfabeto,frecuencias)
     return mensaje_decodificado
         
 #%%
+
+
 '''
 
 Ejemplo (!El mismo mensaje se puede codificar con varios códigos¡)
@@ -214,10 +317,18 @@ las frecuencias, haced una estimación de la ratio de compresión.
 Repetid las estimaciones con numero_de_simbolos=2,3,...
 '''
 
-with open ("la_regenta", "r") as myfile:
-    mensaje=myfile.read()
+n = 10
 
-        
+with open ("la_regenta.txt", "r") as myfile:
+    mensaje=myfile.read()
+    for numero_de_simbolos in range(1,n+1):
+        print("numero de simbolos")
+        print(numero_de_simbolos)
+        mensaje_codificado,alfabeto,frecuencias=EncodeArithmetic(mensaje,numero_de_simbolos)
+        mensaje_recuperado=DecodeArithmetic(mensaje_codificado,len(mensaje),alfabeto,frecuencias)
+        print(mensaje == mensaje_recuperado)
+        ratio_compresion=8*len(mensaje)/len(mensaje_codificado)
+        print(ratio_compresion)
 
 
 
@@ -227,4 +338,3 @@ with open ("la_regenta", "r") as myfile:
 Comparad las ratios de compresión con las obtenidas con códigos de Huffman.
 '''
 
-"""      
