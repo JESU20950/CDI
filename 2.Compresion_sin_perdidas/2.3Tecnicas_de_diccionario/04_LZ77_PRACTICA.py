@@ -18,15 +18,14 @@ LZ77Code(mensaje,12,6)=[['c', 0, 0], ['a', 0, 0],  ['b', 0, 0],
 def LZ77Code(mensaje,S=12,L=6):
     #S is search buffer
     #L is the look-ahead buffer 
-    dictionary = []
+    code = []
     start_look_ahead = 0
     while (start_look_ahead < len(mensaje)):
         
         #find biggest preffix from the the look-ahead buffer that is in the search buffer
         finded_prefix = True
         longitud_maxima_cadena = 0
-        iterator_search_buffer = 0
-        iterator_search_buffer_final = iterator_search_buffer
+        iterator_search_buffer_final = 0
         begginning_search_buffer = start_look_ahead-S
         
         if (begginning_search_buffer < 0):
@@ -36,39 +35,38 @@ def LZ77Code(mensaje,S=12,L=6):
             end_look_ahead = len(mensaje)
             
         while (start_look_ahead+longitud_maxima_cadena< end_look_ahead and finded_prefix): 
-            iterator_search_buffer_final = iterator_search_buffer
             finded_prefix = False
             iterator_search_buffer = start_look_ahead-1
             while (iterator_search_buffer >=  begginning_search_buffer):
                 if(mensaje[iterator_search_buffer:(iterator_search_buffer+longitud_maxima_cadena)+1] == mensaje[start_look_ahead:(start_look_ahead+longitud_maxima_cadena)+1]):
-                    #print("hola")
-                    #print(mensaje[iterator_search_buffer:(iterator_search_buffer+longitud_maxima_cadena)+1])
-                    #print("adios")
                     finded_prefix = True
                     longitud_maxima_cadena = longitud_maxima_cadena +1
+                    iterator_search_buffer_final = iterator_search_buffer
                     break
                 
                 iterator_search_buffer = iterator_search_buffer-1
                 
         #insert the length of the prefix and consecutive char from the prefix
-        print(iterator_search_buffer_final)
-        print(dictionary)
         if (start_look_ahead+longitud_maxima_cadena < len(mensaje)):
             if (longitud_maxima_cadena == 0):
-                dictionary = dictionary + [[mensaje[start_look_ahead],0, 0]]
+                code = code + [[mensaje[start_look_ahead],0, 0]]
             else:
-                dictionary = dictionary + [[mensaje[start_look_ahead+longitud_maxima_cadena],longitud_maxima_cadena, start_look_ahead-iterator_search_buffer_final]]
+                code = code + [[mensaje[start_look_ahead+longitud_maxima_cadena],longitud_maxima_cadena, start_look_ahead-iterator_search_buffer_final]]
         else:
-            dictionary = dictionary + [['EOF',longitud_maxima_cadena, start_look_ahead-iterator_search_buffer_final]]
+            code = code + [['EOF',longitud_maxima_cadena, start_look_ahead-iterator_search_buffer_final]]
             
-        print(dictionary)
         start_look_ahead = start_look_ahead+longitud_maxima_cadena+1
-            
+    return code
+
+
+
+mensaje='patadecabra'
+print(LZ77Code(mensaje,12,6))
 mensaje='cabracadabrarrarr'
-LZ77Code(mensaje,12,6)
+print(LZ77Code(mensaje,12,6))
+    
 
 
-'''
 """
 Dado un mensaje codificado con el algoritmo LZ77 hallar el mensaje 
 correspondiente 
@@ -80,12 +78,22 @@ LZ77Decode(code)='patadecabra'
 
 """   
 def LZ77Decode(codigo):
+    mensaje = ''
+    for c in codigo:
+        print(mensaje)
+        if (c[0] != 'EOF'):
+            position = len(mensaje)-c[2]
+            mensaje = mensaje + mensaje[position:(position+c[1])] + c[0]
+        else:
+            mensaje = mensaje + mensaje[position:(position+c[1])]
+    return mensaje
 
-    
-    
-    
+code=[['p', 0, 0], ['a', 0, 0],  ['t', 0, 0],  ['d', 1, 2],  ['e', 0, 0],
+ ['c', 0, 0], ['b', 1, 4],  ['r', 0, 0], ['EOF', 1, 3]]
+ 
+print(LZ77Decode(code))
 
-
+'''
 """
 Jugar con los valores de S y L (bits_o y bits_l)
 para ver sus efectos (tiempo, tamaño...)
