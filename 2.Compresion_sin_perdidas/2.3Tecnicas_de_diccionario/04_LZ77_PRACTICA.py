@@ -77,23 +77,33 @@ code=[['p', 0, 0], ['a', 0, 0],  ['t', 0, 0],  ['d', 1, 2],  ['e', 0, 0],
 LZ77Decode(code)='patadecabra'
 
 """   
+
+def getprefix(mensaje,c):
+    longitud_maxima_cadena = c[1]
+    position = len(mensaje)-c[2]
+    while (longitud_maxima_cadena>0):
+        mensaje = mensaje+ mensaje[position]
+        position = position+1
+        longitud_maxima_cadena = longitud_maxima_cadena-1
+    return mensaje
+
 def LZ77Decode(codigo):
     mensaje = ''
     for c in codigo:
-        print(mensaje)
+        mensaje = getprefix(mensaje,c)
         if (c[0] != 'EOF'):
-            position = len(mensaje)-c[2]
-            mensaje = mensaje + mensaje[position:(position+c[1])] + c[0]
-        else:
-            mensaje = mensaje + mensaje[position:(position+c[1])]
+            mensaje = mensaje + c[0]
     return mensaje
 
 code=[['p', 0, 0], ['a', 0, 0],  ['t', 0, 0],  ['d', 1, 2],  ['e', 0, 0],
  ['c', 0, 0], ['b', 1, 4],  ['r', 0, 0], ['EOF', 1, 3]]
  
 print(LZ77Decode(code))
+code = [['c', 0, 0], ['a', 0, 0],  ['b', 0, 0],
+ ['r', 0, 0],  ['c', 1, 3],  ['d', 1, 2], ['r', 4, 7],  ['EOF', 4, 3]]
+print(LZ77Decode(code))
 
-'''
+
 """
 Jugar con los valores de S y L (bits_o y bits_l)
 para ver sus efectos (tiempo, tamaño...)
@@ -116,6 +126,6 @@ print (time.clock() - start_time, "seconds decode")
 ratio_compresion=8*len(mensaje)/((bits_o+bits_l+8)*len(mensaje_codificado))
 print('Longitud de mensaje codificado:', len(mensaje_codificado))
 print('Ratio de compresión:', ratio_compresion)
-'''
+
 
 
