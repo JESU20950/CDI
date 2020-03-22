@@ -16,8 +16,42 @@ LZ78Code(mensaje)=[[0, 'w'], [0, 'a'], [0, 'b'], [3, 'a'],
 """
 
 def LZ78Code(mensaje):
-
+    dictionary = []
+    code = []
+    i = 0
     
+    while (i < len(mensaje)):
+        i_final = i+1
+        while(i_final < len(mensaje) and (mensaje[i:i_final] in dictionary) ):
+            i_final = i_final + 1
+        
+        #esto unicamente suceder cuando el prefijo si que existe en el diccionario pero ya no hay mas texto que leer por lo tanto se pone la posicion donde se encuentra el prefijo en el diccionario.
+        if(mensaje[i:i_final] in dictionary):
+            index_dictionari = dictionary.index(mensaje[i:i_final])
+            code = code + [[index_dictionari+1,'EOF']]
+            break
+        
+        dictionary = dictionary + [mensaje[i:i_final]]
+        
+        if (mensaje[i:i_final-1] in dictionary):
+            #print(dictionary)
+            index_dictionari = dictionary.index(mensaje[i:i_final-1])
+            code = code + [[index_dictionari+1,mensaje[i_final-1]]]
+            i = i_final
+        #char nuevo
+        else:
+            code = code + [[0,mensaje[i]]]
+            i = i+1
+    print(dictionary)
+    return code
+        
+mensaje='wabba wabba wabba wabba woo woo woo'
+print(LZ78Code(mensaje))     
+mensaje='mississippi mississippi river'
+print(LZ78Code(mensaje)) 
+        
+
+''''   
 """
 Dado un mensaje codificado con el algoritmo LZ78 hallar el mensaje 
 correspondiente 
@@ -76,3 +110,4 @@ if (mensaje!=mensaje_recuperado):
 
 
     
+'''
