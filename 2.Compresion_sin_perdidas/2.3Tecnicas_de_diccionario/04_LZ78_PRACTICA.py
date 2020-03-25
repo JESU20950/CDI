@@ -42,16 +42,10 @@ def LZ78Code(mensaje):
         else:
             code = code + [[0,mensaje[i]]]
             i = i+1
-    print(dictionary)
     return code
         
-mensaje='wabba wabba wabba wabba woo woo woo'
-print(LZ78Code(mensaje))     
-mensaje='mississippi mississippi river'
-print(LZ78Code(mensaje)) 
         
 
-''''   
 """
 Dado un mensaje codificado con el algoritmo LZ78 hallar el mensaje 
 correspondiente 
@@ -65,9 +59,30 @@ LZ78Decode(code)='mississippi mississippi river'
 """    
 
 def LZ78Decode(codigo):
+    dictionary = []
+    mensaje = ''
+    i = 0
+    for c in codigo:
+        if (c[0] == 0):
+            mensaje = mensaje + c[1]
+            dictionary = dictionary + [c[1]]
+        elif (c[1] != 'EOF'):
+            prefijo = dictionary[(c[0]-1)]
+            mensaje = mensaje + prefijo + c[1]
+            dictionary = dictionary + [prefijo + c[1]]
+        else:
+            prefijo = dictionary[(c[0]-1)]
+            mensaje = mensaje + prefijo
+            dictionary = dictionary + [prefijo]
+    return mensaje
+
+code=[[0, 'm'], [0, 'i'], [0, 's'], [3, 'i'], [3, 's'], 
+      [2, 'p'], [0, 'p'], [2, ' '], [1, 'i'], [5, 'i'], 
+      [10, 'p'], [7, 'i'], [0, ' '], [0, 'r'], [2, 'v'], 
+      [0, 'e'], [14, 'EOF']]
 
     
-    
+
 mensaje='wabba wabba wabba wabba woo woo woo' 
 mensaje_codificado=LZ78Code(mensaje)
 print('Código: ',mensaje_codificado)   
@@ -106,8 +121,4 @@ if (mensaje!=mensaje_recuperado):
         print(len(mensaje),len(mensaje_recuperado))
         print(mensaje[-5:],mensaje_recuperado[-5:])
 
-
-
-
     
-'''
