@@ -326,7 +326,6 @@ with open ("la_regenta.txt", "r") as myfile:
         print(numero_de_simbolos)
         mensaje_codificado,alfabeto,frecuencias=EncodeArithmetic(mensaje,numero_de_simbolos)
         mensaje_recuperado=DecodeArithmetic(mensaje_codificado,len(mensaje),alfabeto,frecuencias)
-        print(mensaje == mensaje_recuperado)
         ratio_compresion=8*len(mensaje)/len(mensaje_codificado)
         print(ratio_compresion)
 
@@ -337,4 +336,5 @@ with open ("la_regenta.txt", "r") as myfile:
 '''
 Comparad las ratios de compresión con las obtenidas con códigos de Huffman.
 '''
+
 

@@ -277,16 +277,16 @@ Repetid las estimaciones con numero_de_simbolos=2,3,...
 n = 10
 with open ("la_regenta.txt", "r") as myfile:
     mensaje=myfile.read()
-    tamaño_original = len(mensaje)
+    original_size = len(mensaje)
     for numero_de_simbolos in range(1,n+1):
         print("numero de simbolos")
         print(numero_de_simbolos)
         mensaje_codificado, m2c, longitud_mensaje = EncodeHuffman(mensaje,numero_de_simbolos)
         #El tamaño original se guarda en chars cada chars son 8 bits en contraposición
         #el mensaje comprimido se guarda en bits por lo que no se multiplica por 8
-        tamaño_comprimido = len(mensaje_codificado)
+        code_size = len(mensaje_codificado)
         print("ratio de compresion sin diccionario")
-        print(tamaño_original*8/tamaño_comprimido)
+        print(original_size*8/code_size)
         
         #El tamaño original se guarda en chars cada chars son 8 bits en contraposición
         #el mensaje comprimido se guarda en bits por lo que no se multiplica por 8
@@ -294,7 +294,7 @@ with open ("la_regenta.txt", "r") as myfile:
         #Por lo que el diccionario es numero de simbolos por numero de codificaciones mas numero de simbolos por tamaño de la codificacion (32 bits = int)
         diccionario = numero_de_simbolos*len(m2c)+ len(m2c)*32
         print("ratio de compresion con diccionario")
-        print(tamaño_original*8/(tamaño_comprimido+diccionario))
+        print(original_size*8/(code_size+diccionario))
 
     
     
