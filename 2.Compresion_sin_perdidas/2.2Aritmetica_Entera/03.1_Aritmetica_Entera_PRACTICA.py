@@ -326,15 +326,71 @@ with open ("la_regenta.txt", "r") as myfile:
         print(numero_de_simbolos)
         mensaje_codificado,alfabeto,frecuencias=EncodeArithmetic(mensaje,numero_de_simbolos)
         mensaje_recuperado=DecodeArithmetic(mensaje_codificado,len(mensaje),alfabeto,frecuencias)
+        print("ratio de compresion si no tenemos en cuenta el alfabeto y las frecuencias")
         ratio_compresion=8*len(mensaje)/len(mensaje_codificado)
         print(ratio_compresion)
-
+        print("ratio de compresion si tenemos en cuenta el alfabeto y las frecuencias")
+        #el tamaño del alfabeto mas las frecuencias es el total de simbolos del alfabeto por 8 bits por el numero de caracteres que tiene cada simbolo del alfabeto. El tamaño de las frecuencias es 32 bits(= int) por el total de frecuencias que hay.
+        size_alphabet_frequencies = len(alfabeto)*8*numero_de_simbolos+len(frecuencias)*32
+        ratio_compresion=(8*len(mensaje))/(len(mensaje_codificado)+size_alphabet_frequencies)
+        print(ratio_compresion)
+        
 
 
 #%%
 
 '''
 Comparad las ratios de compresión con las obtenidas con códigos de Huffman.
-'''
 
+-----------------------Huffman
+1
+ratio de compresion sin diccionario
+1.793636939741042
+ratio de compresion con diccionario
+1.7929193042671787
+numero de simbolos
+2
+ratio de compresion sin diccionario
+2.030553808481733
+ratio de compresion con diccionario
+2.016529264873815
+numero de simbolos
+3
+ratio de compresion sin diccionario
+2.252255242605899
+ratio de compresion con diccionario
+2.1396780419566652
+numero de simbolos
+4
+ratio de compresion sin diccionario
+2.4904792396170308
+ratio de compresion con diccionario
+2.0545095379087184
+numero de simbolos
+
+-----------------------Aritmetica Entera
+1
+ratio de compresion si no tenemos en cuenta el alfabeto y las frecuencias
+1.8093544840172189
+ratio de compresion si tenemos en cuenta el alfabeto y las frecuencias
+1.8084693898263586
+numero de simbolos
+2
+ratio de compresion si no tenemos en cuenta el alfabeto y las frecuencias
+2.037137122864263
+ratio de compresion si tenemos en cuenta el alfabeto y las frecuencias
+2.017266314935019
+numero de simbolos
+3
+ratio de compresion si no tenemos en cuenta el alfabeto y las frecuencias
+2.2582618362070987
+ratio de compresion si tenemos en cuenta el alfabeto y las frecuencias
+2.0824854011255174
+4
+ratio de compresion si no tenemos en cuenta el alfabeto y las frecuencias
+2.495947715375226
+ratio de compresion si tenemos en cuenta el alfabeto y las frecuencias
+1.8111839874845403
+
+'''
 
