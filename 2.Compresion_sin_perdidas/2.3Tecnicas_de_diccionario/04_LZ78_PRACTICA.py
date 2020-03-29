@@ -42,6 +42,10 @@ def LZ78Code(mensaje):
         else:
             code = code + [[0,mensaje[i]]]
             i = i+1
+    
+    #Es opcional poner esto. Lo hemos puesto porque en el ejemplo lo pones.
+    if (code[len(code)-1][1] != 'EOF'):
+        code = code + [[0, 'EOF']]
     return code
         
         
@@ -63,14 +67,14 @@ def LZ78Decode(codigo):
     mensaje = ''
     i = 0
     for c in codigo:
-        if (c[0] == 0):
+        if (c[0] == 0 and c[1] != 'EOF'):
             mensaje = mensaje + c[1]
             dictionary = dictionary + [c[1]]
         elif (c[1] != 'EOF'):
             prefijo = dictionary[(c[0]-1)]
             mensaje = mensaje + prefijo + c[1]
             dictionary = dictionary + [prefijo + c[1]]
-        else:
+        elif (c[0] != 0 and c[1] == 'EOF'):
             prefijo = dictionary[(c[0]-1)]
             mensaje = mensaje + prefijo
             dictionary = dictionary + [prefijo]
