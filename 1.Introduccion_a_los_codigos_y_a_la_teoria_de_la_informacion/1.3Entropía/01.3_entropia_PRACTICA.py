@@ -50,13 +50,15 @@ def H1(n):
 Dada una lista de frecuencias n, hallar su entropía.
 '''
 def H2(n):
+    print(n)
     suma_frecuencias = sum(n)
     suma = 0
     for f in n:
         if (f > 0):
-            p = (f/suma_frecuencias)
+            p = (float(f)/float(suma_frecuencias))
             suma = suma + p*math.log(p,2)
     return -suma
+
 
 
 

@@ -76,13 +76,16 @@ Entropia = 4.224930298009863
 Dada una lista de frecuencias n, halla su entropía.
 '''
 def H2(n):
+    print(n)
     suma_frecuencias = sum(n)
     suma = 0
     for f in n:
         if (f > 0):
-            p = (f/suma_frecuencias)
+            p = (float(f)/float(suma_frecuencias))
             suma = suma + p*math.log(p,2)
     return -suma
+
+
 def tablaFrecuencias(mensaje,numero_de_simbolos=1):
     frecuencias = dict([])
     for i in range(0,len(mensaje),numero_de_simbolos):
