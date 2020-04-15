@@ -33,7 +33,7 @@ def  kraft2(L, q=2):
     while sum <= 1:
         sum = sum + (1/pow(q,maxnumber))
         n = n + 1
-    return n
+    return n-1;
 '''
 Dada la lista L de longitudes de las palabras de un  
 código q-ario, calcular el máximo número de palabras 
