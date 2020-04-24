@@ -34,7 +34,7 @@ plt.figure()
 plt.xticks([])
 plt.yticks([])
 plt.imshow(imagen, cmap=plt.cm.gray,vmin=0, vmax=255)
-plt.show()
+#plt.show()
 
        
 
@@ -44,8 +44,36 @@ Definir una funcion que dada una imagen
 cuantize uniformemente los valores en cada bloque 
 """
 
-def Cuantizacion_uniforme_adaptativa(imagen, bits=3, n_bloque=8):
+
+def cuantizacion_bloque(bloque, bits):
+    minimo = min(map(min, bloque))
+    maximo = max(map(max,bloque))
+    distance = (maximo-minimo)/(2**bits)
+    intervalo = [minimo]
+    for _ in range(0, (2**bits)-1):
+        intervalo = intervalo + [intervalo[len(intervalo)-1]+distance]
+    intervalo = intervalo + [maximo+1]
+    (n,m) = bloque.shape
+    bloqueCodificado = [] 
+    for i in range(0, n):
+        fila = []
+        for j in range(0, m):
+            number = bloque[i,j]
+            for c in range(0,len(intervalo)-1):
+                if (number>= intervalo[c] and number<intervalo[c+1]):
+                    fila = fila + [c]
+        bloqueCodificado = bloqueCodificado + [fila]
+    return [[[minimo, maximo ] , np.array(bloqueCodificado) ]]
     
+
+def Cuantizacion_uniforme_adaptativa(imagen, bits=3, n_bloque=8):
+    (n,m)=imagen.shape
+    imagenCodigo = [[n,m,n_bloque,bits]]
+    for i in range(0,n, n_bloque):
+        for j in range(0,m, n_bloque):
+            bloque = imagen[i:(i+n_bloque), j:(j+n_bloque)]
+            cuantizacion = cuantizacion_bloque(bloque, bits)
+            imagenCodigo = imagenCodigo + cuantizacion
     return imagenCodigo
 
 
@@ -100,10 +128,31 @@ Definir una funcion que dada una imagen codificada por la función
 Cuantizacion_uniforme_adaptativa() muestre la imagen
 
 """
+def decuantizacion_bloque(bloque, bits):
+    [[minimo,maximo],bloqueCodificado] = bloque
+    distance = (maximo-minimo)/(2**bits)
+    f = lambda number: minimo+(distance*number)+distance/2
+    bloquecuantizacion = [f(bloqueCodificado[0])]
+    for numbers in bloqueCodificado[1:]:
+        fila = f(numbers)
+        bloquecuantizacion = np.concatenate((bloquecuantizacion, [fila]), axis=0)
+    return bloquecuantizacion
 
 def Dibuja_imagen_cuantizada(imagenCodigo):
-    
-    return 
+    [n,m,n_bloque,bits] =  imagenCodigo[0]
+    imagenCodigo = imagenCodigo[2:]
+    imagen = [decuantizacion_bloque(imagenCodigo[1], bits)]
+    for bloque in imagenCodigo:
+        c = decuantizacion_bloque(bloque, bits)
+        (_,m_aux) = imagen[len(imagen)-1].shape
+        if (m_aux == m):
+            imagen = imagen + [c]
+        else:
+            imagen[len(imagen)-1] = np.concatenate((imagen[len(imagen)-1],c), axis= 1)
+    imagen_final = imagen[0]
+    for fragmento_imagen in imagen[1:]:
+        imagen_final = np.concatenate((imagen_final,fragmento_imagen), axis = 0)
+    return imagen_final
 
  #%%   
 """
@@ -111,9 +160,10 @@ Aplicar vuestras funciones a las imágenes que encontraréis en la carpeta
 standard_test_images hacer una estimación de la ratio de compresión
 """
 
-       
+imagenCodigo = Cuantizacion_uniforme_adaptativa(imagen, 3, 8)
+imagen2 = Dibuja_imagen_cuantizada(imagenCodigo)
 
-#%%
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -141,7 +191,7 @@ fig.suptitle('Bloques: '+str(bits)+' bits/píxel')
 plt.xticks([])
 plt.yticks([])
 plt.imshow(imagen2, cmap=plt.cm.gray,vmin=0, vmax=255) 
-plt.show()
+#plt.show()
 
 
 # Lectura y escritura de objetos
@@ -166,5 +216,5 @@ with open(fichero, 'rb') as file:
 import PIL
 
 imagenPIL=PIL.Image.fromarray(imagenRecuperada)
-imagenPIL.show()
+#imagenPIL.show()
 imagenPIL.save(fichero +'_imagen.png', 'PNG')
