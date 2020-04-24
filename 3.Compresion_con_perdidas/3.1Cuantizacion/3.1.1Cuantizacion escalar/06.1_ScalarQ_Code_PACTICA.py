@@ -159,12 +159,18 @@ def Dibuja_imagen_cuantizada(imagenCodigo):
 Aplicar vuestras funciones a las imágenes que encontraréis en la carpeta 
 standard_test_images hacer una estimación de la ratio de compresión
 """
+bits=3
+n_bloque = 8
+#q=2**(bits) 
+#imagen2=((np.floor(imagen/q)+1/2).astype(np.uint8))*q
 
-imagenCodigo = Cuantizacion_uniforme_adaptativa(imagen, 3, 8)
+imagenCodigo = Cuantizacion_uniforme_adaptativa(imagen, 2, n_bloque)
+with open('out.txt', 'w') as f:
+	print(imagenCodigo,file=f)
 imagen2 = Dibuja_imagen_cuantizada(imagenCodigo)
-
-
-###############################################################################
+imagenPIL=PIL.Image.fromarray(imagen2)
+imagenPIL.convert('RGB').save('resultado.png')
+####################################
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -179,7 +185,7 @@ Algunas sugerencias que os pueden ser útiles
 # a continuación sumo 1/2 a todos los píxeles de la imagen
 # a continuación convierto los valores de todos los píxeles en enteros de 8 bits sin signo
 # por último múltiplico todos los píxeles de la imagen por q
-
+"""
 bits=3
 q=2**(bits) 
 imagen2=((np.floor(imagen/q)+1/2).astype(np.uint8))*q
@@ -215,6 +221,7 @@ with open(fichero, 'rb') as file:
 
 import PIL
 
-imagenPIL=PIL.Image.fromarray(imagenRecuperada)
-#imagenPIL.show()
+imagenPIL=PIL.Image.fromarray(imagen2)
+imagenPIL.show()
 imagenPIL.save(fichero +'_imagen.png', 'PNG')
+"""
