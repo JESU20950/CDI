@@ -153,23 +153,29 @@ def Dibuja_imagen_cuantizada(imagenCodigo):
     for fragmento_imagen in imagen[1:]:
         imagen_final = np.concatenate((imagen_final,fragmento_imagen), axis = 0)
     return imagen_final
-
+def ratio_compresion(imagen,bits,n_bloque):
+    (n,m)=imagen.shape 
+    size_imagen = n*m*8
+    size_imagenCodigo = (n*m*bits)+ 2*32*(m/n_bloque)
+    return (size_imagen/size_imagenCodigo)
  #%%   
 """
 Aplicar vuestras funciones a las imágenes que encontraréis en la carpeta 
 standard_test_images hacer una estimación de la ratio de compresión
 """
-bits=3
+bits=2
 n_bloque = 8
 #q=2**(bits) 
 #imagen2=((np.floor(imagen/q)+1/2).astype(np.uint8))*q
 
-imagenCodigo = Cuantizacion_uniforme_adaptativa(imagen, 2, n_bloque)
+imagenCodigo = Cuantizacion_uniforme_adaptativa(imagen, bits, n_bloque)
 with open('out.txt', 'w') as f:
 	print(imagenCodigo,file=f)
 imagen2 = Dibuja_imagen_cuantizada(imagenCodigo)
 imagenPIL=PIL.Image.fromarray(imagen2)
 imagenPIL.convert('RGB').save('resultado.png')
+print(ratio_compresion(imagen,bits,n_bloque))
+
 ####################################
 ###############################################################################
 ###############################################################################
