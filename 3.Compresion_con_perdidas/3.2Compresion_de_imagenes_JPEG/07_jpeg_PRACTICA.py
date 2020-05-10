@@ -8,7 +8,7 @@ import scipy
 import imageio
 import math 
 import scipy.fftpack
-
+import time
 
 
 import matplotlib.pyplot as plt
@@ -49,6 +49,7 @@ def Q_matrix(r=1):
         for j in range(8):
             m[i,j]=(1+i+j)*r
     return m
+
 
 '''
 Implementar la DCT (Discrete Cosine Transform) 
@@ -108,15 +109,17 @@ def dctmtx(N):
     return dct_matrix
 
 def dct_bloque_v2(p):
-    (N,_) = p.shape
+    (_,N) = p.shape
     c = dctmtx(N)
-    w = np.matmul(np.matmul(c,p),np.transpose(c))
+    #w = c*p*c'
+    w = np.dot((np.dot(c,p)),np.transpose(c))
     return w
 
 def idct_bloque_v2(w):
-    (N,_) = p.shape
+    (_,N) = p.shape
     c = dctmtx(N)
-    p = np.matmul(np.matmul(np.transpose(c),w), c)
+    #p = c'*w*c
+    p = np.dot(np.transpose(c),np.dot(w,c))
     return p
 
 '''
@@ -125,33 +128,31 @@ Ver imágenes adjuntas.
 '''
 
 def basis_function_blocks(N):
-    dct_matrix = np.transpose(dctmtx(N))
+    dct_matrix = dctmtx(N)
+    
     
     basis = np.zeros((N,N,N,N))
     #obtiene la imagen de los bloques base de la transformación
     for i in range(0,N):
         for j in range(0,N):
-            a = [dct_matrix[:,i]]
-            b = np.array([dct_matrix[:,j]]).T
+            a = np.array([dct_matrix[i,:]]).T
+            b = [dct_matrix[j,:]]
             basis[:,:,i,j] =  a*b
     
     #imprime la imagen de los bloques base de la transformación
+    k = 1
     for i in range(0,N):
-        k = i+1
         for j in range (0,N):
             minbase = basis[:,:,i,j].min()
             maxbase = basis[:,:,i,j].max()
             rango = maxbase-minbase
             imagen = ((basis[:,:,i,j]+rango)*(255/(maxbase+rango)))
-            
             plt.subplot(N,N,k)
             plt.imshow(imagen, cmap=plt.cm.gray)
-            #plt.show()
-            k = k +N;
-            
+            k = k+1
     plt.show()
 
-basis_function_blocks(2**2)
+#basis_function_blocks(2**3)
     
 
 '''
@@ -170,6 +171,7 @@ Sigma=np.sqrt(sum(sum((imagen_gray-imagen_jpeg)**2)))/np.sqrt(sum(sum((imagen_gr
 '''
 
 def jpeg_gris(imagen_gray):
+
     return
 
 ''''
@@ -185,28 +187,157 @@ según los coeficientes nulos de la transformación:
 Sigma=np.sqrt(sum(sum((imagen_color-imagen_jpeg)**2)))/np.sqrt(sum(sum((imagen_color)**2)))
 
 '''
+def fromRGBtoYCbCr(imagen_color):
+    R = imagen_color[:,:,0]
+    G = imagen_color[:,:,1]
+    B = imagen_color[:,:,2]
+    Y = 0.299*R+0.587*G+0.114*B
+    Cb = -0.1687*R-0.3313*G+0.5*B+128
+    Cr = 0.5*R-0.4187*G-0.0813*B+128
+    return [Y,Cb,Cr]
 
-def jpeg_color(imagen_color):
+def resize_mod_rgb(imagen_color,N):
+    (D1,D2,_) = imagen_color.shape
+    if (D1%N != 0):
+        D1_addition = N-(D1%N)
+        last = image_color[(D1-1),:,:]
+        last = np.repeat(last,repeats = D1_addition-1, axis = 0)
+        imagen_color = np.concatenate((imagen_color,last),axis = 0)
+    if (D2%N != 0):
+        D2_Addition = N-(D2%N)
+        last = image_color[:,(D2-1),:]        
+        last = np.repeat(last,repeats = D2_addition-1, axis = 1)
+        imagen_color = np.concatenate((imagen_color,last),axis = 1)
+    return imagen_color
+        
+def dct_division_por_bloque(datos,N):
+    (D1,D2) = datos.shape
+    for i in range(0,D1,N):
+        for j in range(0,D2,N):
+            datos_aux = datos[i:(i+N),j:(j+N)]
+            datos_aux = dct_bloque_v2(datos_aux)
+            datos[i:(i+N),j:(j+N)] = datos_aux
+    return datos
+    
+def cuantizacion_division_por_bloque(datos, matrix_cuantitation, N):
+    (D1,D2) = datos.shape
+    for i in range(0,D1,N):
+        for j in range(0,D2,N):
+            datos_aux = datos[i:(i+N),j:(j+N)]
+            #datous_aux = round(datos_aux./matrix_cuantitation)
+            datos_aux = np.around(np.divide(datos_aux,matrix_cuantitation))
+            datos[i:(i+N),j:(j+N)] = datos_aux
+    return datos
+
+
+def binari(number, digits):
+    binari_number = "{0:b}".format(number)
+    rest = digits-len(binari_number)
+    for i in range(0, rest):
+        binari_number = '0'+binari_number
+    
+    return binari_number
+
+def binary_DC_code(number):
+    row = 0
+    if(number != 0):
+        row = math.floor(math.log(abs(number),2)+1)
+    coderow = '0'
+    for i in range(0,row):
+        coderow = '1'+coderow
+    
+    column = number
+    if (number <0):
+        column = ((2**row)-1)+number
+    
+    codecolumn = '0'
+    if (column != 2**15):
+        codecolumn =  binari(column,len(coderow))
+    return coderow+codecolumn
+        
+    
+def codificacion_DC(data,N):
+    (D1,D2) = data.shape
+    DCs = np.array((D1,D2))
+    j = 0
+    for i in range(0,D1,N):
+        for j in range(0,D2,N):
+            if(i == j and i == 0):
+                DCs[i,j] = binary_DC_code(data[i,j])
+                anterior = data[i,j]
+            else:
+                diferencia = anterior-data[i,j] 
+                DCs[i,j] = binary_DC_code(diferencia)
+                anterior = data[i,j]
+    return DCs
+            
+def codificacion_DC_AC(data,N):
+    DCs = codificacion_DC(data,N)
+    ACs = codificacion_AC(data,N)
+    
+            
+def jpeg_color_compression(imagen_color,N=8):
+    #Si el numero de filas o columnas no es multiplo de N, se replica la última fila/columnas
+    (D1,D2,_) = imagen_color.shape
+    imagen_color = resize_mod_rgb(imagen_color,N)
+    
+    #Convertir de RGB a YCbCr
+    [Y,Cb,Cr] = fromRGBtoYCbCr(imagen_color)
+    
+
+    #A cada bloque se le aplica la DCT, pero previamente se le resta
+    #128 a cada elemento del bloque para que el coeficiente DC se
+    #reduzca su valor en 128 · 64 = 8192 en promedio.
+    Y = Y-128
+    Cb = Cb-128
+    Cr = Cr-128
+    
+    #DCT por bloques de tamaño N
+    Y = dct_division_por_bloque(Y,N)
+    Cb = dct_division_por_bloque(Cb,N)
+    Cr = dct_division_por_bloque(Cr,N)
+    
+    #Se cuantizan los valores obtenidos, con las matrices de
+    #cuantización. Los estándares usan una para la componente Y ,
+    #luminancia, y otras para las componentes Cb y Cr , crominancias,
+    #pero se pueden utilizar otras que se han de incluir.
+    Y = cuantizacion_division_por_bloque(Y,Q_Luminance,N)
+    Cb = cuantizacion_division_por_bloque(Cb,Q_Chrominance,N)
+    Cr = cuantizacion_division_por_bloque(Cr,Q_Chrominance,N)
+    
+    #Se tratan los coeficientes DC y AC por separado. Todos los DC se
+    #codifican juntos (sus diferencias); los 63 AC se codifican juntos
+    Y = codificacion_DC_AC(Y,N)
+    Cb = codificacion_DC_AC(Cb,N)
+    Cr = codificacion_DC_AC(Cb,N)
+    
+    
+    
+    
+    
     return
-
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 '''
 #--------------------------------------------------------------------------
 Imagen de GRISES
 
 #--------------------------------------------------------------------------
+
 '''
 
 
 ### .astype es para que lo lea como enteros de 32 bits, si no se
 ### pone lo lee como entero positivo sin signo de 8 bits uint8 y por ejemplo al 
 ### restar 128 puede devolver un valor positivo mayor que 128
-
+'''
 mandril_gray=scipy.ndimage.imread('mandril_gray.png').astype(np.int32)
 
 start= time.clock()
 mandril_jpeg=jpeg_gris(mandril_gray)
 end= time.clock()
 print("tiempo",(end-start))
+'''
 
 
 '''
@@ -215,12 +346,12 @@ Imagen COLOR
 #--------------------------------------------------------------------------
 '''
 
-mandril_color=scipy.misc.imread('./mandril_color.png').astype(np.int32)
+mandril_color=imageio.imread('./mandril_color.png').astype(np.int32)
 
 
 
 start= time.clock()
-mandril_jpeg=jpeg_color(mandril_color)     
+#mandril_jpeg=jpeg_color_compression(mandril_color,8)     
 end= time.clock()
 print("tiempo",(end-start))
      
