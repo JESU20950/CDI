@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 
 
 
+    
 
         
 '''
@@ -109,13 +110,13 @@ def dctmtx(N):
 def dct_bloque_v2(p):
     (N,_) = p.shape
     c = dctmtx(N)
-    w = c*p*np.transpose(c)
+    w = np.matmul(np.matmul(c,p),np.transpose(c))
     return w
 
 def idct_bloque_v2(w):
     (N,_) = p.shape
     c = dctmtx(N)
-    p = np.transpose(c)*w*c
+    p = np.matmul(np.matmul(np.transpose(c),w), c)
     return p
 
 '''
@@ -123,18 +124,28 @@ Reproducir los bloques base de la transformación para los casos N=4,8
 Ver imágenes adjuntas.
 '''
 
-            
-    
-    
 def basis_function_blocks(N):
-    dct_matrix = dctmtx(N)
-    zeros = np.zeros((N,N,N,N))
-    for i in range(0,N)
-        for 
+    dct_matrix = np.transpose(dctmtx(N))
     
-    
-    
-#basis_function_images(2**3)
+    basis = np.zeros((N,N,N,N))
+    for i in range(0,N):
+        for j in range(0,N):
+            a = [dct_matrix[:,i]]
+            b = np.array([dct_matrix[:,j]]).T
+            basis[:,:,i,j] =  a*b
+            
+    k = 1
+    for i in range(0,N):
+        for j in range (0,N):
+            minbase = basis[:,:,i,j].min()
+            maxbase = basis[:,:,i,j].max()
+            rango = maxbase-minbase
+            imagen = ((basis[:,:,i,j]+rango)*(255/(maxbase+rango)))
+            plt.imshow(imagen, cmap=plt.cm.gray)
+            plt.show()
+
+
+basis_function_blocks(2**3)
     
 
 '''
