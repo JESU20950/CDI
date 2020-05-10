@@ -128,24 +128,30 @@ def basis_function_blocks(N):
     dct_matrix = np.transpose(dctmtx(N))
     
     basis = np.zeros((N,N,N,N))
+    #obtiene la imagen de los bloques base de la transformación
     for i in range(0,N):
         for j in range(0,N):
             a = [dct_matrix[:,i]]
             b = np.array([dct_matrix[:,j]]).T
             basis[:,:,i,j] =  a*b
-            
-    k = 1
+    
+    #imprime la imagen de los bloques base de la transformación
     for i in range(0,N):
+        k = i+1
         for j in range (0,N):
             minbase = basis[:,:,i,j].min()
             maxbase = basis[:,:,i,j].max()
             rango = maxbase-minbase
             imagen = ((basis[:,:,i,j]+rango)*(255/(maxbase+rango)))
+            
+            plt.subplot(N,N,k)
             plt.imshow(imagen, cmap=plt.cm.gray)
-            plt.show()
+            #plt.show()
+            k = k +N;
+            
+    plt.show()
 
-
-basis_function_blocks(2**3)
+basis_function_blocks(2**2)
     
 
 '''
