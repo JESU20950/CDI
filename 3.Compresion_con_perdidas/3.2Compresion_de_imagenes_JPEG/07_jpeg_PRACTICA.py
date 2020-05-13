@@ -239,21 +239,24 @@ def binari(number, digits):
     return binari_number
 
 def binary_DC_code(number):
-    row = 0
-    if(number != 0):
-        row = math.floor(math.log(abs(number),2)+1)
+    if(number == 2**15):
+        return ['1111111111111111','0000000000000000']
+    if(number == 0):
+        return '0'
+
+    row = math.floor(math.log(abs(number),2)+1)    
     coderow = '0'
     for i in range(0,row):
         coderow = '1'+coderow
-    
+        
     column = number
     if (number <0):
         column = ((2**row)-1)+number
     
-    codecolumn = '0'
-    if (column != 2**15):
-        codecolumn =  binari(column,len(coderow))
-    return coderow+codecolumn
+
+    codecolumn =  binari(column,row)
+
+    return [coderow,codecolumn]
         
     
 def codificacion_DC(data,N):
@@ -349,7 +352,9 @@ Imagen COLOR
 mandril_color=imageio.imread('./mandril_color.png').astype(np.int32)
 
 
-
+print(binary_DC_code((2**15)-1))
+print(binary_DC_code(-4))
+print(binary_DC_code(4))
 start= time.clock()
 #mandril_jpeg=jpeg_color_compression(mandril_color,8)     
 end= time.clock()
