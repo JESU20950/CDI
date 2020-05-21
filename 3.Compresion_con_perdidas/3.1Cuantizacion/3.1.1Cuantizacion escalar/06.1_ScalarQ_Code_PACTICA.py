@@ -168,13 +168,13 @@ n_bloque = 8
 #q=2**(bits) 
 #imagen2=((np.floor(imagen/q)+1/2).astype(np.uint8))*q
 
-imagenCodigo = Cuantizacion_uniforme_adaptativa(imagen, bits, n_bloque)
-with open('out.txt', 'w') as f:
-	print(imagenCodigo,file=f)
-imagen2 = Dibuja_imagen_cuantizada(imagenCodigo)
-imagenPIL=PIL.Image.fromarray(imagen2)
-imagenPIL.convert('RGB').save('resultado.png')
-print(ratio_compresion(imagen,bits,n_bloque))
+#imagenCodigo = Cuantizacion_uniforme_adaptativa(imagen, bits, n_bloque)
+#with open('out.txt', 'w') as f:
+#	print(imagenCodigo,file=f)
+#imagen2 = Dibuja_imagen_cuantizada(imagenCodigo)
+#imagenPIL=PIL.Image.fromarray(imagen2)
+#imagenPIL.convert('RGB').save('resultado.png')
+#print(ratio_compresion(imagen,bits,n_bloque))
 
 ####################################
 ###############################################################################
@@ -191,11 +191,13 @@ Algunas sugerencias que os pueden ser útiles
 # a continuación sumo 1/2 a todos los píxeles de la imagen
 # a continuación convierto los valores de todos los píxeles en enteros de 8 bits sin signo
 # por último múltiplico todos los píxeles de la imagen por q
-"""
+
 bits=3
 q=2**(bits) 
 imagen2=((np.floor(imagen/q)+1/2).astype(np.uint8))*q
 
+imagenCodigo = Cuantizacion_uniforme_adaptativa(imagen2)
+imagen2  = Dibuja_imagen_cuantizada(imagenCodigo)
 # dibujo la imagen cuanzizada resultante
 
 fig=plt.figure()
@@ -203,7 +205,7 @@ fig.suptitle('Bloques: '+str(bits)+' bits/píxel')
 plt.xticks([])
 plt.yticks([])
 plt.imshow(imagen2, cmap=plt.cm.gray,vmin=0, vmax=255) 
-#plt.show()
+plt.show()
 
 
 # Lectura y escritura de objetos
@@ -212,12 +214,17 @@ import pickle
 
 fichero='QScalar'
 
-with  open(fichero+'_dump.pickle', 'wb') as file:
-    pickle.dump(imagenCodigo, file)
+
+    
+#with open(fichero+'_dump.pickle', 'wb') as file:
+#    pickle.dump(imagenCodigo, file)
 
 
-with open(fichero, 'rb') as file:
+with open('./QScalar_dump.pickle', 'rb') as file:
     imagenLeidaCodificada=pickle.load(file)
+    imagen_final = Dibuja_imagen_cuantizada(imagenLeidaCodificada)
+    plt.imshow(imagen_final, cmap=plt.cm.gray,vmin=0, vmax=255) 
+    plt.show()
 
 
 # Convertir un array en imagen, mostrarla y guardarla en formato png.
@@ -230,4 +237,4 @@ import PIL
 imagenPIL=PIL.Image.fromarray(imagen2)
 imagenPIL.show()
 imagenPIL.save(fichero +'_imagen.png', 'PNG')
-"""
+

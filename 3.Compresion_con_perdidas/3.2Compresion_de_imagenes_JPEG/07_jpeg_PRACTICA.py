@@ -148,7 +148,8 @@ def basis_function_blocks(N):
             k = k+1
     plt.show()
 
-#basis_function_blocks(2**3)
+basis_function_blocks(2**2)
+basis_function_blocks(2**3)
 
 '''
 Implementar la función jpeg_gris(imagen_gray) que: 
@@ -163,38 +164,6 @@ según los coeficientes nulos de la transformación:
 Sigma=np.sqrt(sum(sum((imagen_gray-imagen_jpeg)**2)))/np.sqrt(sum(sum((imagen_gray)**2)))
 
 '''
-
-def jpeg_gris(imagen_gray):
-    return
-
-'''
-Implementar la función jpeg_color(imagen_color) que: 
-1. dibuje el resultado de aplicar la DCT y la cuantización 
-(y sus inversas) a la imagen RGB 'imagen_color' 
-
-2. haga una estimación de la ratio de compresión
-según los coeficientes nulos de la transformación: 
-(#coeficientes/#coeficientes no nulos).
-
-3. haga una estimación del error para cada una de las componentes RGB
-Sigma=np.sqrt(sum(sum((imagen_color-imagen_jpeg)**2)))/np.sqrt(sum(sum((imagen_color)**2)))
-
-'''
-
-def fromRGBtoYCbCr(imagen_color):
-    R = imagen_color[:,:,0]
-    G = imagen_color[:,:,1]
-    B = imagen_color[:,:,2]
-    Y = 0.299*R+0.587*G+0.114*B
-    Cb = -0.1687*R-0.3313*G+0.5*B+128
-    Cr = 0.5*R-0.4187*G-0.0813*B+128
-    return [Y,Cb,Cr]
-
-def fromYCbCrtoRGB(Y,Cb,Cr):
-    R = Y + 1.402*(Cr-128)
-    G = Y - 0.71414*(Cr-128) - 0.34414*(Cb-128)
-    B = Y+ 1.772*(Cb-128) 
-    return [R,G,B]
     
 def dct_division_por_bloque(datos,N):
     (D1,D2) = datos.shape
@@ -235,12 +204,66 @@ def descuantizacion_division_por_bloque(datos, matrix_cuantitation, N):
             datos[i:(i+N),j:(j+N)] = datos_aux
     return datos
 
+
+def ratio_compresion_coeficientes_gray(Gray):
+    [D1,D2] = Gray.shape
+    coeficientes_nulos = np.sum(Gray == 0.)
+    coeficientes = D1*D2
+    print("ratio compresion", coeficientes/coeficientes_nulos)   
+    
+def estimacion_error_gray(imagen_gray,imagen_jpeg):
+    sigmagray = np.sqrt(sum(sum((imagen_gray - imagen_jpeg) ** 2))) / np.sqrt(sum(sum((imagen_gray) ** 2)))
+    print("sigmaGray" , sigmagray)
+    
+    
+def jpeg_gris(imagen_gray):
+    N = 8
+    imagen_jpeg = imagen_gray -128
+    imagen_jpeg = dct_division_por_bloque(imagen_jpeg,N)
+    imagen_jpeg = cuantizacion_division_por_bloque(imagen_jpeg,Q_Luminance,N)
+    ratio_compresion_coeficientes_gray(imagen_jpeg)
+    imagen_jpeg = descuantizacion_division_por_bloque(imagen_jpeg,Q_Luminance,N)
+    imagen_jpeg = idct_division_por_bloque(imagen_jpeg,N)
+    imagen_jpeg = imagen_jpeg +128
+    estimacion_error_gray(imagen_gray,imagen_jpeg)
+    plt.imshow(imagen_jpeg, cmap=plt.cm.gray,vmin=0, vmax=255)
+    plt.show()
+    return
+
+'''
+Implementar la función jpeg_color(imagen_color) que: 
+1. dibuje el resultado de aplicar la DCT y la cuantización 
+(y sus inversas) a la imagen RGB 'imagen_color' 
+
+2. haga una estimación de la ratio de compresión
+según los coeficientes nulos de la transformación: 
+(#coeficientes/#coeficientes no nulos).
+
+3. haga una estimación del error para cada una de las componentes RGB
+Sigma=np.sqrt(sum(sum((imagen_color-imagen_jpeg)**2)))/np.sqrt(sum(sum((imagen_color)**2)))
+
+'''
+def fromRGBtoYCbCr(imagen_color):
+    R = imagen_color[:,:,0]
+    G = imagen_color[:,:,1]
+    B = imagen_color[:,:,2]
+    Y = 0.299*R+0.587*G+0.114*B
+    Cb = -0.1687*R-0.3313*G+0.5*B+128
+    Cr = 0.5*R-0.4187*G-0.0813*B+128
+    return [Y,Cb,Cr]
+
+def fromYCbCrtoRGB(Y,Cb,Cr):
+    R = Y + 1.402*(Cr-128)
+    G = Y - 0.71414*(Cr-128) - 0.34414*(Cb-128)
+    B = Y+ 1.772*(Cb-128) 
+    return [R,G,B]
+
 def ratio_compresion_coeficientes(Y,Cb, Cr):
     [D1,D2] = Y.shape
     coeficientes_nulos = np.sum(Y == 0.) + np.sum(Cb == 0.) + np.sum(Cr == 0.)
     coeficientes = D1*D2*3
     print("ratio compresion", coeficientes/coeficientes_nulos)
-
+    
 def estimacion_error(imagen_color,imagen_jpeg):
     sigmaR = np.sqrt(sum(sum((imagen_color[:, :, 0] - imagen_jpeg[:, :, 0]) ** 2))) / np.sqrt(sum(sum((imagen_color[:, :, 0]) ** 2)))
     sigmaG = np.sqrt(sum(sum((imagen_color[:, :, 1] - imagen_jpeg[:, :, 1]) ** 2))) / np.sqrt(sum(sum((imagen_color[:, :, 1]) ** 2)))
@@ -249,7 +272,7 @@ def estimacion_error(imagen_color,imagen_jpeg):
     print("sigmaG", sigmaG)
     print("sigmaB", sigmaB)
     
-    
+
 def jpeg_color(imagen_color):
 
     N = 8
@@ -303,8 +326,9 @@ def jpeg_color(imagen_color):
     imagen_jpeg[:,:,2] = B
     imagen_jpeg = imagen_jpeg.astype(np.uint8)
     estimacion_error(imagen_color,imagen_jpeg)
-    plt.imshow(imagen_color)
+    plt.imshow(imagen_jpeg)
     plt.show()
+    return imagen_jpeg
     
     
    
@@ -321,14 +345,13 @@ Imagen de GRISES
 ### pone lo lee como entero positivo sin signo de 8 bits uint8 y por ejemplo al 
 ### restar 128 puede devolver un valor positivo mayor que 128
 
-'''
-mandril_gray=scipy.ndimage.imread('mandril_gray.png').astype(np.int32)
 
+mandril_gray=imageio.imread('./mandril_gray.png').astype(np.int32)
 start= time.clock()
 mandril_jpeg=jpeg_gris(mandril_gray)
 end= time.clock()
 print("tiempo",(end-start))
-'''
+
 
 
 '''
@@ -337,7 +360,7 @@ Imagen COLOR
 #--------------------------------------------------------------------------
 '''
 
-mandril_color=imageio.imread('./mandril_color.png')
+mandril_color=imageio.imread('./mandril_color.png').astype(np.int32)
 
 
 start= time.clock()

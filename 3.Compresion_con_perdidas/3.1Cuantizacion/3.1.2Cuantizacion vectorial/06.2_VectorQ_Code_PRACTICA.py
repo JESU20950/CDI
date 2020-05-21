@@ -258,3 +258,4 @@ imagenPIL.show()
 imagenPIL.save(fichero +'_imagen.png', 'PNG')
 
 """
+
