@@ -13,6 +13,7 @@ import time
 
 import matplotlib.pyplot as plt
 
+from scipy.fftpack import dct, idct
 
 
 
@@ -105,7 +106,7 @@ def dctmtx(N):
             else:
                 dct_matrix[i,j] = math.sqrt(2/N)*math.cos((2*j+1)*i*math.pi/(2*N))
     return dct_matrix
-    
+
 def dct_bloque_v2(p):
     (_,N) = p.shape
     c = dctmtx(N)
@@ -118,6 +119,8 @@ def idct_bloque_v2(w):
     #p = c'*w*c
     p = np.dot(np.transpose(c),np.dot(w,c))
     return p
+
+
 '''
 Reproducir los bloques base de la transformación para los casos N=4,8
 Ver imágenes adjuntas.
@@ -125,8 +128,6 @@ Ver imágenes adjuntas.
 
 def basis_function_blocks(N):
     dct_matrix = dctmtx(N)
-    
-    
     basis = np.zeros((N,N,N,N))
     #obtiene la imagen de los bloques base de la transformación
     for i in range(0,N):
@@ -190,7 +191,7 @@ def cuantizacion_division_por_bloque(datos, matrix_cuantitation, N):
         for j in range(0,D2,N):
             datos_aux = datos[i:(i+N),j:(j+N)]
             #datous_aux = round(datos_aux./matrix_cuantitation)
-            datos_aux = np.around(np.divide(datos_aux,matrix_cuantitation))
+            datos_aux = np.round(np.divide(datos_aux,matrix_cuantitation))
             datos[i:(i+N),j:(j+N)] = datos_aux
     return datos
 
@@ -200,7 +201,7 @@ def descuantizacion_division_por_bloque(datos, matrix_cuantitation, N):
         for j in range(0,D2,N):
             datos_aux = datos[i:(i+N),j:(j+N)]
             #datous_aux = round(datos_aux./matrix_cuantitation)
-            datos_aux = np.around(np.multiply(datos_aux,matrix_cuantitation))
+            datos_aux = np.multiply(datos_aux,matrix_cuantitation)
             datos[i:(i+N),j:(j+N)] = datos_aux
     return datos
 
@@ -209,10 +210,10 @@ def ratio_compresion_coeficientes_gray(Gray):
     [D1,D2] = Gray.shape
     coeficientes_nulos = np.sum(Gray == 0.)
     coeficientes = D1*D2
-    print("ratio compresion", coeficientes/coeficientes_nulos)   
+    print("ratio compresion", coeficientes/(coeficientes-coeficientes_nulos))
     
 def estimacion_error_gray(imagen_gray,imagen_jpeg):
-    sigmagray = np.sqrt(sum(sum((imagen_gray - imagen_jpeg) ** 2))) / np.sqrt(sum(sum((imagen_gray) ** 2)))
+    sigmagray=np.sqrt(sum(sum((imagen_gray-imagen_jpeg)**2)))/np.sqrt(sum(sum((imagen_gray)**2)))
     print("sigmaGray" , sigmagray)
     
     
@@ -225,10 +226,11 @@ def jpeg_gris(imagen_gray):
     imagen_jpeg = descuantizacion_division_por_bloque(imagen_jpeg,Q_Luminance,N)
     imagen_jpeg = idct_division_por_bloque(imagen_jpeg,N)
     imagen_jpeg = imagen_jpeg +128
+    imagen_jpeg = imagen_jpeg.astype(np.uint8)
     estimacion_error_gray(imagen_gray,imagen_jpeg)
     plt.imshow(imagen_jpeg, cmap=plt.cm.gray,vmin=0, vmax=255)
     plt.show()
-    return
+    return imagen_jpeg
 
 '''
 Implementar la función jpeg_color(imagen_color) que: 
@@ -262,12 +264,12 @@ def ratio_compresion_coeficientes(Y,Cb, Cr):
     [D1,D2] = Y.shape
     coeficientes_nulos = np.sum(Y == 0.) + np.sum(Cb == 0.) + np.sum(Cr == 0.)
     coeficientes = D1*D2*3
-    print("ratio compresion", coeficientes/coeficientes_nulos)
+    print("ratio compresion", coeficientes/(coeficientes-coeficientes_nulos))
     
 def estimacion_error(imagen_color,imagen_jpeg):
-    sigmaR = np.sqrt(sum(sum((imagen_color[:, :, 0] - imagen_jpeg[:, :, 0]) ** 2))) / np.sqrt(sum(sum((imagen_color[:, :, 0]) ** 2)))
-    sigmaG = np.sqrt(sum(sum((imagen_color[:, :, 1] - imagen_jpeg[:, :, 1]) ** 2))) / np.sqrt(sum(sum((imagen_color[:, :, 1]) ** 2)))
-    sigmaB = np.sqrt(sum(sum((imagen_color[:, :, 2] - imagen_jpeg[:, :, 2]) ** 2))) / np.sqrt(sum(sum((imagen_color[:, :, 2]) ** 2)))
+    sigmaR =np.sqrt(sum(sum((imagen_color[:,:,0]-imagen_jpeg[:,:,0])**2)))/np.sqrt(sum(sum((imagen_color[:,:,0])**2)))
+    sigmaG =np.sqrt(sum(sum((imagen_color[:,:,1]-imagen_jpeg[:,:,1])**2)))/np.sqrt(sum(sum((imagen_color[:,:,1])**2)))
+    sigmaB =np.sqrt(sum(sum((imagen_color[:,:,2]-imagen_jpeg[:,:,2])**2)))/np.sqrt(sum(sum((imagen_color[:,:,2])**2)))
     print("sigmaR" , sigmaR)
     print("sigmaG", sigmaG)
     print("sigmaB", sigmaB)
